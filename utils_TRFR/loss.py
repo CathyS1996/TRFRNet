@@ -4,34 +4,6 @@ import torch.nn.functional as F
 
 """BCE loss"""
 
-class WeightedBCEWithLogitsLoss(nn.Module):
-    
-    def __init__(self, size_average=True):
-        super(WeightedBCEWithLogitsLoss, self).__init__()
-        self.size_average = size_average
-        
-    def weighted(self, input, target, weight, alpha, beta):
-        if not (target.size() == input.size()):
-            raise ValueError("Target size ({}) must be the same as input size ({})".format(target.size(), input.size()))
-
-        max_val = (-input).clamp(min=0)
-        loss = input - input * target + max_val + ((-max_val).exp() + (-input - max_val).exp()).log()
-                
-        if weight is not None:
-            loss = alpha * loss + beta * loss * weight
-
-        if self.size_average:
-            return loss.mean()
-        else:
-            return loss.sum()
-    
-    def forward(self, input, target, weight, alpha, beta):
-        if weight is not None:
-            return self.weighted(input, target, weight, alpha, beta)
-        else:
-            return self.weighted(input, target, None, alpha, beta)
-
-
 class BCELoss(nn.Module):
     def __init__(self, weight=None, size_average=True):
         super(BCELoss, self).__init__()

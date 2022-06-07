@@ -6,7 +6,7 @@ import datasets
 from utils_TRFR.metrics import evaluate
 from opt import opt
 from utils_TRFR.comm import generate_model
-from utils_TRFR.loss import BceDiceLoss
+from utils_TRFR.loss import BceDiceLoss, BCELoss
 from utils_TRFR.metrics import Metrics
 import os
 import numpy as np
@@ -132,7 +132,7 @@ def train():
             if opt.use_gpu:
                 D_out1_l = (torch.FloatTensor(D_out1.data.size()).fill_(source_label)).cuda()
 
-            loss_adv_target1 = BceDiceLoss()(torch.mul(D_out1,mask), torch.mul(D_out1_l,mask)) + 0.5*BceDiceLoss()(torch.mul(D_out1,~mask), torch.mul(D_out1_l,~mask))
+            loss_adv_target1 = BCELoss()(torch.mul(D_out1,mask), torch.mul(D_out1_l,mask)) + 0.5*BceDiceLoss()(torch.mul(D_out1,~mask), torch.mul(D_out1_l,~mask))
             loss_adv = 0.001*loss_adv_target1
             loss_adv.backward()
             optimizer.step()
@@ -164,7 +164,7 @@ def train():
             D_out_pred1 = model_D1(torch.sigmoid(pred1))
             if opt.use_gpu:
                 D_out_pred1_l = (torch.FloatTensor(D_out_pred1.data.size()).fill_(source_label)).cuda()
-            loss_D1_pred1 =  BceDiceLoss()(torch.mul(D_out_pred1,mask_),torch.mul(D_out_pred1_l,mask_)) + 0.5*BceDiceLoss()(torch.mul(D_out_pred1,~mask_),torch.mul(D_out_pred1_l,~mask_))
+            loss_D1_pred1 =  BCELoss()(torch.mul(D_out_pred1,mask_),torch.mul(D_out_pred1_l,mask_)) + 0.5*BceDiceLoss()(torch.mul(D_out_pred1,~mask_),torch.mul(D_out_pred1_l,~mask_))
             loss_D1_pred1.backward()
 
             tpred1 = toutput.detach()
@@ -172,7 +172,7 @@ def train():
             D_out_tpred1 = model_D1(torch.sigmoid(tpred1))
             if opt.use_gpu:
                 D_out_tpred1_l = (torch.FloatTensor(D_out_tpred1.data.size()).fill_(target_label)).cuda()
-            loss_D1_tpred1 =  BceDiceLoss()(torch.mul(D_out_tpred1,tmask_),torch.mul(D_out_tpred1_l,tmask_)) + 0.5* BceDiceLoss()(torch.mul(D_out_tpred1,~tmask_),torch.mul(D_out_tpred1_l,~tmask_))
+            loss_D1_tpred1 =  BCELoss()(torch.mul(D_out_tpred1,tmask_),torch.mul(D_out_tpred1_l,tmask_)) + 0.5* BceDiceLoss()(torch.mul(D_out_tpred1,~tmask_),torch.mul(D_out_tpred1_l,~tmask_))
             loss_D1_tpred1.backward()
             optimizer_D1.step()
 
